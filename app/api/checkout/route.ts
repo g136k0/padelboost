@@ -73,13 +73,14 @@ export async function POST(request: Request) {
       shipping_options: [{ shipping_rate: shippingRate }],
       automatic_tax: { enabled: process.env.STRIPE_AUTOMATIC_TAX_ENABLED === "true" },
       metadata: {
+        store: "padelboost",
         bundle,
         pair_count: String(product.quantity),
         pair_1_size: firstSize,
         ...(bundle === "double" ? { pair_2_size: secondSize as string } : {}),
       },
       success_url: origin.origin + "/success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: origin.origin + "/#shop",
+      cancel_url: origin.origin + "/products/padel-insoles#buy",
     });
     if (!session.url) return respond("We couldn't open checkout. Please try again.", 502);
     return NextResponse.json({ url: session.url }, { headers: { "Cache-Control": "no-store" } });

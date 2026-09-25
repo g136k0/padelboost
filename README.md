@@ -56,3 +56,33 @@ The two-pair offer lets shoppers pick a different size for each pair. The invent
 ## Deploy
 
 Import `g136k0/padelboost` to Vercel, use the Next.js preset, add environment variables and deploy. Connect a domain after updating `NEXT_PUBLIC_SITE_URL`. By default preview pages contain a visible launch notice and are marked `noindex`.
+
+## Private admin dashboard at /admin
+
+The independent admin page lives at `https://padelboost.vercel.app/admin` when deployed on that Vercel domain. **It is not linked anywhere on the public website** and is excluded from search engine indexing. Access is protected by a strong passphrase and a signed, HTTP-only, 12-hour browser session cookie. The login and every order page request are checked on the server; knowing the URL is not sufficient to view orders.
+
+In **Vercel → Your project → Settings → Environment Variables**, add these **server-only** values:
+
+| Name | What to enter |
+| --- | --- |
+| `ADMIN_PASSWORD` | A unique high-entropy password, **20+ characters**. |
+| `ADMIN_SESSION_SECRET` | A **different** unique random value, **32+ characters**, used to sign private sessions. |
+| `STRIPE_SECRET_KEY` | Your own Stripe account's `sk_test_...` or `sk_live_...` key. Existing checkout uses the same variable. |
+
+Generate the two independent admin values locally (run **twice**):
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+```
+Never commit or share these credentials or expose them with a `NEXT_PUBLIC_` prefix. Choose **Production** (and separately Preview if desired), save the variables, and **redeploy**. Configuring the dashboard does not enable customer payments: `CHECKOUT_ENABLED` remains `false` until you finish preparing checkout.
+
+**Before using the login with real customer information**, set up Vercel WAF rate limiting for admin login traffic and enable two-factor authentication on your Vercel and Stripe accounts. This simple single-owner password login does not include a distributed brute-force limiter.
+
+### What the dashboard shows
+- The latest **completed Stripe Checkout sessions** created by PadelBoost, including confirmed paid orders and payments still processing. Abandoned checkouts are not orders.
+- Customer name, email, phone when supplied, delivery address when returned by Stripe (otherwise clearly labeled billing address), purchased bundle, both selected sizes and charged total.
+- A Stripe payment link where available, refresh control and **Older orders** pagination. Each page fetches up to 100 Stripe checkout sessions and displays only those associated with PadelBoost; if the same Stripe account handles other stores, you may need to page through multiple batches.
+- Page-level paid counts and totals. These numbers are intentionally **not all-time business totals**.
+
+Orders are read **directly from Stripe**; no extra database, webhooks or admin API are required for this viewing-only implementation. Do **not** use the dashboard as a fulfillment log: there is no shipped/delivered status or automated shipping. For fulfillment automation, add a signed Stripe webhook and a durable order database first.
+
+If Stripe isn't connected, you can sign in after setting the two admin values, but you'll see an instruction to add your Stripe key. Stripe test keys show **test transactions only**; use your live key when ready for real orders.
