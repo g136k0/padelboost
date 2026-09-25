@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import Stripe from "stripe";
-import { ArrowDown, ArrowRight, ArrowUpRight, CheckCircle2, CircleAlert, LockKeyhole, LogOut, Package, RefreshCw, Truck } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight, CheckCircle2, CircleAlert, LockKeyhole, LogOut, Package, RefreshCw, ShieldCheck, Truck } from "lucide-react";
 import { adminConfigured, adminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import { adminLogin, adminLogout } from "./actions";
 import "./admin.css";
