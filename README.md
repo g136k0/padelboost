@@ -2,7 +2,7 @@
 
 An independent, mobile-first, **one-product EU storefront** built with Next.js App Router, TypeScript and Stripe Checkout. No Shopify dependency.
 
-## Quick start
+\n## Storefront pages\n\n- \`/\`: existing editorial landing page and its original offer section. The main 'Get yours' calls to action now link to the dedicated product page.\n- \`/products/padel-insoles\`: new standalone product-detail page featuring a three-panel **concept gallery**, selectable one- or two-pair bundles, per-pair EU size selection, server-validated Stripe checkout, product information and product FAQs.\n- Real product photos, inspected measurements, authentic customer reviews and shipping/returns specifics should replace placeholders before launch. Both pages deliberately share pricing, provisional sizes and the server-side checkout route in \`lib/store.ts\`.\n\n## Quick start
 
 Requires Node.js 20.9+.
 

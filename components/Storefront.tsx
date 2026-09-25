@@ -50,7 +50,7 @@ function Logo({ light = false }: { light?: boolean }) {
 }
 
 function Cta({ children = "Find your fit", variant = "lime", onClick }: { children?: ReactNode; variant?: "lime" | "outline"; onClick?: () => void }) {
-  return <a href="#shop" onClick={onClick} className={`btn ${variant === "lime" ? "btn-lime" : "btn-outline"}`}>{children}<ArrowUpRight size={18} strokeWidth={1.8}/></a>;
+  return <a href="/products/padel-insoles" onClick={onClick} className={`btn ${variant === "lime" ? "btn-lime" : "btn-outline"}`}>{children}<ArrowUpRight size={18} strokeWidth={1.8}/></a>;
 }
 
 export default function Storefront() {
@@ -102,11 +102,12 @@ export default function Storefront() {
           <nav id="site-navigation" className={`desktop-nav ${mobileMenu ? "nav-open" : ""}`} aria-label="Main navigation">
             <a href="#why" onClick={closeMenu}>The idea</a>
             <a href="#how" onClick={closeMenu}>How it works</a>
+            <Link href="/products/padel-insoles" onClick={closeMenu}>Shop insoles</Link>
             <a href="#questions" onClick={closeMenu}>FAQs</a>
-            <a href="#shop" className="mobile-nav-buy" onClick={closeMenu}>Shop now <ArrowRight size={17}/></a>
+            <Link href="/products/padel-insoles" className="mobile-nav-buy" onClick={closeMenu}>Shop now <ArrowRight size={17}/></Link>
           </nav>
           <div className="header-actions">
-            <a href="#shop" className="header-buy">GET YOURS <ArrowUpRight size={16}/></a>
+            <Link href="/products/padel-insoles" className="header-buy">GET YOURS <ArrowUpRight size={16}/></Link>
             <button className="menu-toggle" type="button" onClick={() => setMobileMenu(!mobileMenu)}
               aria-expanded={mobileMenu} aria-controls="site-navigation" aria-label={mobileMenu ? "Close menu" : "Open menu"}>
               {mobileMenu ? <X size={23}/> : <Menu size={23}/>}
@@ -279,11 +280,11 @@ export default function Storefront() {
       <footer className="site-footer">
         <div className="container">
           <div className="footer-top"><Logo light/><p>More court.<br/>Less compromise.</p></div>
-          <div className="footer-bottom"><span>© {new Date().getFullYear()} PadelBoost. All rights reserved.</span><div className="footer-links"><Link href="/shipping-returns">SHIPPING & RETURNS</Link><Link href="/privacy">PRIVACY</Link><Link href="/terms">TERMS</Link>{store.contactEmail && <a href={`mailto:${store.contactEmail}`}>CONTACT</a>}</div><a href="#hero-heading" className="back-top">BACK TO TOP ↑</a></div>
+          <div className="footer-bottom"><span>© {new Date().getFullYear()} PadelBoost. All rights reserved.</span><div className="footer-links"><Link href="/products/padel-insoles">SHOP INSOLES</Link><Link href="/shipping-returns">SHIPPING & RETURNS</Link><Link href="/privacy">PRIVACY</Link><Link href="/terms">TERMS</Link>{store.contactEmail && <a href={`mailto:${store.contactEmail}`}>CONTACT</a>}</div><a href="#hero-heading" className="back-top">BACK TO TOP ↑</a></div>
           {store.preview && <p className="footer-preview">PRE-LAUNCH PROTOTYPE — Product art, pricing, size ranges and draft policies require verification. No live payments.</p>}
         </div>
       </footer>
-      <a className="mobile-sticky" href="#shop">FIND YOUR FIT <ArrowRight size={19}/></a>
+      <Link className="mobile-sticky" href="/products/padel-insoles">FIND YOUR FIT <ArrowRight size={19}/></Link>
     </>
   );
 }
