@@ -1,7 +1,8 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { store } from "@/lib/store";
 
-export default function PolicyLayout({ title, children }: { title: string; children: React.ReactNode }) {
+export default function PolicyLayout({ title, children }: { title: string; children: ReactNode }) {
   return <main className="policy"><div className="container">
     <Link href="/" className="eyebrow">← PADELBOOST / BACK TO SHOP</Link>
     <h1>{title}</h1>
