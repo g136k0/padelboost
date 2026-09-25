@@ -7,7 +7,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
   const { session_id: id } = await searchParams;
   let paid = false;
   let pending = false;
-  if (id && /^cs_(test_)?[a-zA-Z0-9]+$/.test(id) && process.env.STRIPE_SECRET_KEY) {
+  if (id && /^cs_(?:test|live)_[a-zA-Z0-9]+$/.test(id) && process.env.STRIPE_SECRET_KEY) {
     try {
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
       const session = await stripe.checkout.sessions.retrieve(id);
