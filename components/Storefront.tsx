@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowDown, ArrowRight, ArrowUpRight, Check, ChevronDown, CircleHelp,
@@ -49,7 +49,7 @@ function Logo({ light = false }: { light?: boolean }) {
   );
 }
 
-function Cta({ children = "Find your fit", variant = "lime", onClick }: { children?: React.ReactNode; variant?: "lime" | "outline"; onClick?: () => void }) {
+function Cta({ children = "Find your fit", variant = "lime", onClick }: { children?: ReactNode; variant?: "lime" | "outline"; onClick?: () => void }) {
   return <a href="#shop" onClick={onClick} className={`btn ${variant === "lime" ? "btn-lime" : "btn-outline"}`}>{children}<ArrowUpRight size={18} strokeWidth={1.8}/></a>;
 }
 
