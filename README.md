@@ -2,7 +2,24 @@
 
 An independent, mobile-first, **one-product EU storefront** built with Next.js App Router, TypeScript and Stripe Checkout. No Shopify dependency.
 
-\n## Storefront pages\n\n- \`/\`: existing editorial landing page and its original offer section. The main 'Get yours' calls to action now link to the dedicated product page.\n- \`/products/padel-insoles\`: new standalone product-detail page featuring a three-panel **concept gallery**, selectable one- or two-pair bundles, per-pair EU size selection, server-validated Stripe checkout, product information and product FAQs.\n- Real product photos, inspected measurements, authentic customer reviews and shipping/returns specifics should replace placeholders before launch. Both pages deliberately share pricing, provisional sizes and the server-side checkout route in \`lib/store.ts\`.\n\n## Quick start
+\n## Storefront pages\n\n- \`/\`: existing editorial landing page and its original offer section. The main 'Get yours' calls to action now link to the dedicated product page.\n- \`/products/padel-insoles\`: new standalone product-detail page featuring a three-panel **concept gallery**, selectable one- or two-pair bundles, per-pair EU size selection, server-validated Stripe checkout, product information and product FAQs.\n- Real product photos, inspected measurements, authentic customer reviews and shipping/returns specifics should replace placeholders before launch. Both pages deliberately share pricing, provisional sizes and the server-side checkout route in \`lib/store.ts\`.\n\n## Stripe Products, Checkout and VAT setup
+
+PadelBoost uses **Stripe-hosted Checkout** with **catalog-backed Stripe Price IDs**.
+The website is still deployable with checkout disabled and the values below unset.
+
+1. In Stripe **test mode**, create two active *one-time* products/prices, one for the Starter Pair (€24.90) and one for the Doubles Pack (€39.90). Set the prices to EUR with tax behavior **inclusive** so product page prices and Checkout agree. Assign an appropriate physical-goods tax code after checking the actual product classification. The bundle is one sale item representing two pairs, with each pair's selected EU size included in order metadata.
+2. Copy their `price_...` IDs to server-only Vercel variables `STRIPE_PRICE_SINGLE` and `STRIPE_PRICE_DOUBLE`. Use test prices with `sk_test_...` and create *new* live prices to use with `sk_live_...`. Never mix test and live IDs.
+3. Create and test an EU delivery shipping rate in Stripe and put its ID in `STRIPE_SHIPPING_RATE_ID`. Check whether this rate is VAT inclusive and has the correct shipping tax code. Customer address is collected by Checkout; our store's initial list allows only EU countries.
+4. Set up Stripe Tax: confirm business origin, product classifications and actual registration(s), consulting a qualified adviser where appropriate. If you're legally ready to calculate and collect tax, set `STRIPE_AUTOMATIC_TAX_ENABLED=true`. Don't treat the toggle as an alternative to registering where required. Test addresses in different EU countries and confirm calculations and displayed all-in prices.
+5. With **test** credentials and valid operational details, set `CHECKOUT_ENABLED=true` in a preview deployment, make a test purchase, verify both sizes in `/admin` and in the Stripe PaymentIntent metadata, then test cancellation and a declined payment.
+6. Before using **live** Stripe credentials, finalize product specs, tax, returns and shipping policies, Vercel admin rate limiting, support email and fulfillment responsibilities. `NEXT_PUBLIC_STORE_MODE=live` changes public launch display/indexing; checkout availability is controlled *separately* by `CHECKOUT_ENABLED`.
+
+The server retrieves each Stripe price and **rejects checkout** if its amount, currency, active state, one-time billing or inclusive tax treatment differs from `lib/store.ts`. If you update prices, update the display and server catalog expectations together before enabling checkout.
+
+**Fulfilment:** The private order dashboard reads live Stripe Checkout Sessions and shows completed paid/processing purchases. It does *not* persist shipments. For automatic shipping or transactional notifications, build a signed Stripe webhook handler with idempotent, durable order storage; do not trigger shipment solely from the success-page redirect or an unverified webhook request.
+
+
+## Quick start
 
 Requires Node.js 20.9+.
 
@@ -19,7 +36,7 @@ The initial site is deliberately in **preview** mode. The proposed €24.90 / �
 
 1. Order and physically inspect the AliExpress product; confirm material, available sizes, shoe compatibility, safety and manufacturer/importer information. Replace `components/InsoleArt.tsx`'s illustrative render with high-quality photos of the *actual* product, including scale and installation footage. Don't claim clinical results, injury prevention, customer reviews or a specialist design without appropriate proof.
 2. Insert the real seller legal name, registered address, valid contact email, fulfilment origin, shipping costs, returns address, refund policy and accurate delivery window. Replace the placeholder legal pages in `app/privacy`, `app/terms` and `app/shipping-returns`. Verify EU product-safety, consumer and privacy compliance.
-3. Configure your Stripe account, enable the payment methods you want, set an EU Shipping Rate, set up tax registrations and confirm VAT treatment with your accountant. For automatic Stripe Tax, enable it in your account and set `STRIPE_AUTOMATIC_TAX_ENABLED=true` after registration. Product pricing is currently passed to Stripe as tax-inclusive where Stripe Tax is enabled.
+3. Configure your Stripe account, enable the payment methods you want, set an EU Shipping Rate, set up tax registrations and confirm VAT treatment with your accountant, and create the two Stripe catalog price IDs above. For automatic Stripe Tax, enable it in your account and set `STRIPE_AUTOMATIC_TAX_ENABLED=true` after registration. Product pricing is currently passed to Stripe as tax-inclusive where Stripe Tax is enabled.
 4. Add Vercel environment variables (below) and deploy. **Only after all launch checks**, set `CHECKOUT_ENABLED=true` and `NEXT_PUBLIC_STORE_MODE=live`.
 5. Configure Stripe Dashboard customer receipts and manually fulfil paid orders through Stripe Dashboard until you connect your fulfilment provider. A successful browser redirect alone **is not proof of payment**; the success page verifies the Stripe session. For production automation, add a signed Stripe webhook and a durable fulfilment datastore before automating shipments.
 

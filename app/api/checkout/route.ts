@@ -50,35 +50,51 @@ export async function POST(request: Request) {
   }
 
   const product = products[bundle];
+  // Keep the product catalog as the single source of truth once checkout is enabled.
+  // The actual Price objects are created in Stripe (test and live modes are separate).
+  const priceId = bundle === "single"
+    ? process.env.STRIPE_PRICE_SINGLE
+    : process.env.STRIPE_PRICE_DOUBLE;
+  if (!priceId || !/^price_[a-zA-Z0-9]+$/.test(priceId)) {
+    return respond("This product isn't configured for checkout yet.", 503);
+  }
+
   try {
     const stripe = new Stripe(secret);
+    // Protect against an accidental discrepancy between storefront display price
+    // and the Stripe price actually charged to the customer.
+    const stripePrice = await stripe.prices.retrieve(priceId);
+    if (
+      !stripePrice.active ||
+      stripePrice.type !== "one_time" ||
+      stripePrice.currency.toLowerCase() !== "eur" ||
+      stripePrice.unit_amount !== product.price ||
+      stripePrice.tax_behavior !== "inclusive"
+    ) {
+      console.error("Stripe catalog price does not match PadelBoost storefront configuration");
+      return respond("This item is temporarily unavailable. Please contact support.", 503);
+    }
+
+    const orderMetadata = {
+      store: "padelboost",
+      bundle,
+      pair_count: String(product.quantity),
+      pair_1_size: firstSize,
+      ...(bundle === "double" ? { pair_2_size: secondSize as string } : {}),
+    };
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_creation: "always",
       billing_address_collection: "required",
-      line_items: [{
-        price_data: {
-          currency: "eur",
-          unit_amount: product.price,
-          // If automatic tax is enabled, consumer-facing prices remain VAT inclusive.
-          tax_behavior: "inclusive",
-          product_data: {
-            name: "PadelBoost — " + product.title,
-            description: product.quantity + " pair(s) of PadelBoost sports insoles",
-          },
-        },
-        quantity: 1,
-      }],
+      // Stripe Dashboard product and price IDs, including a verified physical-goods tax code.
+      line_items: [{ price: priceId, quantity: 1 }],
       shipping_address_collection: { allowed_countries: [...shippingCountries] },
       shipping_options: [{ shipping_rate: shippingRate }],
       automatic_tax: { enabled: process.env.STRIPE_AUTOMATIC_TAX_ENABLED === "true" },
-      metadata: {
-        store: "padelboost",
-        bundle,
-        pair_count: String(product.quantity),
-        pair_1_size: firstSize,
-        ...(bundle === "double" ? { pair_2_size: secondSize as string } : {}),
-      },
+      metadata: orderMetadata,
+      // Mirror purchase details onto the PaymentIntent so they're visible
+      // in Stripe payment records as well as Checkout Sessions.
+      payment_intent_data: { metadata: orderMetadata },
       success_url: origin.origin + "/success?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: origin.origin + "/products/padel-insoles#buy",
     });
